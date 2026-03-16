@@ -1,4 +1,4 @@
-package models
+package botmodel
 
 import "github.com/bwmarrin/discordgo"
 

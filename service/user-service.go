@@ -1,10 +1,12 @@
 package service
 
 import (
+	botmodel "bayar-woy-project/bot-model"
 	"bayar-woy-project/config"
 	"bayar-woy-project/dto"
 	"bayar-woy-project/models"
 	"bayar-woy-project/responses"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -25,13 +27,12 @@ func Register(c *gin.Context) {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 
 	user := models.User{
-		Username: req.Username,
-		Password: string(hashedPassword),
-		Debt: 0,
-		Cash: 0,
+		Username:   req.Username,
+		Password:   string(hashedPassword),
+		Debt:       0,
+		Cash:       0,
 		Receivable: 0,
 	}
-
 
 	result := config.DB.Create(&user)
 	if result.Error != nil {
@@ -46,4 +47,31 @@ func Register(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, apiResponse)
+}
+
+func ValidateOtp(c *gin.Context) {
+	var req dto.ValidateOtpDto
+	var otp botmodel.DiscordBotOtp
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad Request"})
+		return
+	}
+
+	if err := config.DB.Where("user_id = ?", req.UserID).First(&otp).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "OTP not found"})
+		return
+	}
+
+	if otp.OTP != req.OTP || !otp.ExpiredAt.After(time.Now()) {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid OTP"})
+		return
+	}
+
+	apiResponse := responses.APIResponse{
+		StatusCode: http.StatusOK,
+		Message:    "OTP validated successfully",
+		Data:       nil,
+	}
+	c.JSON(http.StatusOK, apiResponse)
 }

@@ -1,24 +1,27 @@
 package bot
 
 import (
-	"bayar-woy-project/models"
+	botmodel "bayar-woy-project/bot-model"
+	"bayar-woy-project/handler"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func InitDiscordBot(token string) (*models.DiscordBotSession, error) {
+func InitDiscordBot(token string) (*botmodel.DiscordBotSession, error) {
 	bot, err := discordgo.New("Bot " + token)
 	if err != nil {
 		return nil, err
 	}
 
-	return &models.DiscordBotSession{Sesion: bot}, nil
+	bot.AddHandler(handler.MessageHandler)
+
+	return &botmodel.DiscordBotSession{Sesion: bot}, nil
 }
 
-func Start(b *models.DiscordBotSession) error {
+func Start(b *botmodel.DiscordBotSession) error {
 	return b.Sesion.Open()
 }
 
-func Stop(b *models.DiscordBotSession) {
+func Stop(b *botmodel.DiscordBotSession) {
 	b.Sesion.Close()
 }
