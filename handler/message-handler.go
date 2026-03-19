@@ -1,15 +1,19 @@
 package handler
 
 import (
-	"bayar-woy-project/bot-model"
-	"bayar-woy-project/bot-service"
+	botservice "bayar-woy-project/bot-service"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
 
-func MessageHandler(m *discordgo.MessageCreate) {
-	var bot botmodel.DiscordBotSession
+func DiscordHandlerRegister(s *discordgo.Session) {
+	s.AddHandler(MessageHandler)
+}
+
+func MessageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+	bot := s
+
 
 	if m.Author.Bot {
 		return
@@ -17,13 +21,24 @@ func MessageHandler(m *discordgo.MessageCreate) {
 
 	args := strings.Split(m.Content, " ")
 	command := args[0]
+	userId := m.Author.ID
 
 	switch command {
 		case "!register":
-			userId := m.Author.ID
+			if(len(args) < 2) {
+				bot.ChannelMessageSend(m.ChannelID, "Invailid command format. Use !register <username>")
+				return
+			}
 			res := botservice.RegisterUserToBot(args[1], userId)
 
-			bot.Sesion.ChannelMessageSend(m.ChannelID, res)
+			bot.ChannelMessageSend(m.ChannelID, res)
+			
+		case "!friendList":
+			res := botservice.GetFriendsList(userId)
+			bot.ChannelMessageSend(m.ChannelID, res)
+
+		case "!ping":
+			bot.ChannelMessageSend(m.ChannelID, "Pong!")
 	}	
 
 }

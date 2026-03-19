@@ -13,7 +13,9 @@ type User struct {
 	Receivable   int           `gorm:"column:receivable" json:"receivable"`
 	Cash         int           `gorm:"column:cash" json:"cash"`
 	DiscordID    *string       `gorm:"column:discord_id" json:"discordId"`
+	IsValidated  bool          `gorm:"column:is_validated; default:false" json:"isValidated"`
 	Transactions []Transaction `gorm:"foreignKey:OwnerID" json:"transactions"`
+	Expenses     []Expense     `gorm:"foreignKey:OwnerID" json:"expenses"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
