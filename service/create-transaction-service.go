@@ -15,6 +15,7 @@ func CreateTransaction(c *gin.Context) {
 	var req dto.TransactionDTO
 	var owner models.User
 	var debtor models.User
+	userId := c.GetString("userId")
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad Request"})
@@ -25,7 +26,7 @@ func CreateTransaction(c *gin.Context) {
 		Amount:      req.Amount,
 		Description: req.Description,
 		DebtorID:    req.DebtorID,
-		OwnerID:     req.OwnerID,
+		OwnerID:     userId,
 		Status:      "pending",
 	}
 
@@ -34,7 +35,7 @@ func CreateTransaction(c *gin.Context) {
 		return
 	}
 
-	config.DB.Where("id = ?", req.OwnerID).First(&owner)
+	config.DB.Where("id = ?", userId).First(&owner)
 	config.DB.Where("id = ?", req.DebtorID).First(&debtor)
 
 	owner.Receivable += req.Amount
@@ -53,14 +54,10 @@ func CreateTransaction(c *gin.Context) {
 }
 
 func GetTransactions(c *gin.Context) {
-	username := c.GetString("username")
-	var user models.User
-	if err := config.DB.Where("username = ?", username).First(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "User not found"})
-		return
-	}
+	userId := c.GetString("userId")
+
 	var transactions []models.Transaction
-	if err := config.DB.Where("owner_id = ?", user.ID).Preload("Debtor").Find(&transactions).Error; err != nil {
+	if err := config.DB.Where("owner_id = ?", userId).Preload("Debtor").Find(&transactions).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Failed to retrieve transactions"})
 		return
 	}

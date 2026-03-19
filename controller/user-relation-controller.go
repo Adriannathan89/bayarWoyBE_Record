@@ -12,7 +12,7 @@ func UserRelationController(r *gin.Engine) {
 	user.Use(guard.AuthMiddleware())
 	{
 		user.POST("/add-friend", service.SentFriendRequest)
-		user.GET("/friend-requests", service.GetFriendRequests)
-		user.PUT("/friend-requests/update", service.FriendRequestUpdate)
+		user.GET("/friend-request", service.GetFriendRequests)
+		user.PUT("/friend-request/response", service.FriendRequestResponse)
 	}
-}
+}	

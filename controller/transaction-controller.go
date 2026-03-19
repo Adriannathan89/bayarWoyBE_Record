@@ -12,7 +12,7 @@ func TransactionController(r *gin.Engine) {
 	transaction.Use(guard.AuthMiddleware())
 	{
 		transaction.POST("/create", service.CreateTransaction)
-		transaction.GET("/list", service.GetTransactions)
+		transaction.GET("", service.GetTransactions)
 		transaction.PUT("/finish", service.FinishTransaction)
 	}
 }

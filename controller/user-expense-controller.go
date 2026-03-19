@@ -11,7 +11,7 @@ func UserExpenseController(r *gin.Engine) {
 	user := r.Group("/user")
 	user.Use(guard.AuthMiddleware())
 	{
-		user.POST("/expenses", service.CreateExpense)
-		user.GET("/expenses", service.GetExpenses)
+		user.POST("/expense", service.CreateExpense)
+		user.GET("/expense", service.GetExpenses)
 	}
 }

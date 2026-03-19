@@ -56,7 +56,7 @@ func GetFriendRequests(c *gin.Context) {
 	c.JSON(http.StatusOK, apiResponse)
 }
 
-func FriendRequestUpdate(c *gin.Context) {
+func FriendRequestResponse(c *gin.Context) {
 	var req dto.RelationPhase2
 	var friendRequest models.FriendRequest
 
