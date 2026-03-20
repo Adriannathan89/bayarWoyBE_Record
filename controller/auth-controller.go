@@ -12,5 +12,6 @@ func AuthController(r *gin.Engine) {
 		auth.POST("/login", service.Login)
 		auth.POST("/refresh", service.GenerateNewToken)
 		auth.POST("/logout", service.Logout)
+		auth.GET("/validate-session", service.ValidateStillValidSession)
 	}
 }

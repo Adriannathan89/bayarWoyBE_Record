@@ -63,7 +63,7 @@ func FriendRequestResponse(c *gin.Context) {
 	c.ShouldBindJSON(&req)
 
 	if req.Action == "reject" {
-		config.DB.Where("id = ?", req.FriendshipID).Delete(&friendRequest)
+		config.DB.Where("id = ?", req.FriendRequestID).Delete(&friendRequest)
 		
 		apiResponse := responses.APIResponse{
 			StatusCode: http.StatusOK,
@@ -74,12 +74,12 @@ func FriendRequestResponse(c *gin.Context) {
 		return
 	}
 
-	if err := config.DB.Preload("Sender").Preload("Receiver").Where("id = ?", req.FriendshipID).First(&friendRequest).Error; err != nil {
+	if err := config.DB.Where("id = ?", req.FriendRequestID).First(&friendRequest).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Friend request not found"})
 		return
 	}
 
-	config.DB.Where("id = ?", req.FriendshipID).Delete(&friendRequest)
+	config.DB.Where("id = ?", req.FriendRequestID).Delete(&friendRequest)
 	
 
 	newFriendship := models.Friendship{

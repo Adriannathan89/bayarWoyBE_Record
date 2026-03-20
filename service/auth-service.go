@@ -38,11 +38,11 @@ func Login(c *gin.Context) {
 	refreshToken, _ := guard.GenerateRefreshToken(user.ID, user.Username)
 
 	sesion := models.Sesion{
-		UserID: user.ID,
-		Username: user.Username,
+		UserID:       user.ID,
+		Username:     user.Username,
 		RefreshToken: refreshToken,
-		IPAddress: c.ClientIP(),
-		ExpiresAt: time.Now().Add(24 * time.Hour),
+		IPAddress:    c.ClientIP(),
+		ExpiresAt:    time.Now().Add(24 * time.Hour),
 	}
 
 	config.DB.Create(&sesion)
@@ -50,13 +50,24 @@ func Login(c *gin.Context) {
 	c.SetCookie("token", token, 3600, "/", "localhost", false, true)
 	c.SetCookie("refresh_token", refreshToken, 3600*24, "/", "localhost", false, true)
 
-
 	apiResponse = responses.APIResponse{
 		StatusCode: http.StatusOK,
 		Message:    "Login successful",
 		Data:       user,
 	}
 	c.JSON(http.StatusOK, apiResponse)
+}
+
+func ValidateStillValidSession(c *gin.Context) {
+	token, _ := c.Cookie("token")
+
+	claims, err := guard.ValidateToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Session is still valid", "claims": claims})
 }
 
 func GenerateNewToken(c *gin.Context) {

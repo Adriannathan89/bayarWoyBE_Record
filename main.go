@@ -13,6 +13,7 @@ import (
 
 func main() {
 	loader.LoadConfig()
+	
 	r := gin.Default()
 	allowedOrigins := config.GetEnv("ALLOWED_ORIGINS")
 
@@ -25,9 +26,9 @@ func main() {
 	}))
 
 	controller.AuthController(r)
-	controller.UserController(r)
-	controller.UserRelationController(r)
 	controller.TransactionController(r)
+	controller.UserController(r)
+	controller.UserFriendController(r)
 	controller.UserExpenseController(r)
 
 	r.Run(":" + config.GetEnv("PORT"))
