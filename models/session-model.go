@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Sesion struct {
+type Session struct {
 	ID           string    `gorm:"primaryKey" json:"id"`
 	Username     string    `gorm:"column:username" json:"username"`
 	UserID       string    `gorm:"column:user_id" json:"userId"`
@@ -16,7 +16,7 @@ type Sesion struct {
 	ExpiresAt    time.Time `gorm:"column:expires_at" json:"expiresAt"`
 }
 
-func (s *Sesion) BeforeCreate(tx *gorm.DB) error {
+func (s *Session) BeforeCreate(tx *gorm.DB) error {
 	if s.ID == "" {
 		s.ID = uuid.NewString()
 	}

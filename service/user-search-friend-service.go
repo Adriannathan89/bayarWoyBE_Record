@@ -22,7 +22,7 @@ func SearchFriend(c *gin.Context) {
 	var query struct {
 		Name string `json:"name" binding:"required"`
 	}
-	userId := c.GetString("userId")
+	userId := c.GetString("userID")
 
 	if err := c.ShouldBindJSON(&query); err != nil {
 		c.JSON(400, gin.H{"message": "Name query parameter is required"})
@@ -59,7 +59,7 @@ func SearchFriend(c *gin.Context) {
 }
 
 func GetAllFriends(c *gin.Context) {
-	userId := c.GetString("userId")
+	userId := c.GetString("userID")
 	var friends []models.Friendship
 
 	if err := config.DB.Where("user_id = ?", userId).Find(&friends).Error; err != nil {

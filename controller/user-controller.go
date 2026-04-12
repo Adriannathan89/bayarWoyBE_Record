@@ -11,5 +11,6 @@ func UserController(r *gin.Engine) {
 	{
 		user.POST("/register", service.Register)
 		user.POST("/validate-otp", service.ValidateOtp)
+		user.GET("/all-records", service.LoadAllRecords)
 	}
 }

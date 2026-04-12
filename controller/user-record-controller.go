@@ -7,11 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UserExpenseController(r *gin.Engine) {
+func UserRecordController(r *gin.Engine) {
 	user := r.Group("/user")
 	user.Use(guard.AuthMiddleware())
 	{
-		user.POST("/expense", service.CreateExpense)
-		user.GET("/expense", service.GetExpenses)
+		user.POST("/record", service.CreateRecord)
 	}
 }

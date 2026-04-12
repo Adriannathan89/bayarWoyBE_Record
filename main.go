@@ -26,10 +26,10 @@ func main() {
 	}))
 
 	controller.AuthController(r)
-	controller.TransactionController(r)
+	controller.DebtController(r)
 	controller.UserController(r)
 	controller.UserFriendController(r)
-	controller.UserExpenseController(r)
+	controller.UserRecordController(r)
 
 	r.Run(":" + config.GetEnv("PORT"))
 }

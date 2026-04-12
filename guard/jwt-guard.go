@@ -31,7 +31,7 @@ func GenerateToken(username string, userID string) (string, error) {
 }
 
 func GenerateRefreshToken(username string, userID string) (string, error) {
-	expirationTime := time.Now().Add(1 * 24 * time.Hour)
+	expirationTime := time.Now().Add(4 * time.Hour)
 	claims := models.Claims{
 		Username: username,
 		UserID:   userID,

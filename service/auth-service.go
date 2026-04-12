@@ -34,21 +34,21 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, _ := guard.GenerateToken(user.ID, user.Username)
+	token, _ := guard.GenerateToken(user.Username, user.ID)
 	refreshToken, _ := guard.GenerateRefreshToken(user.ID, user.Username)
 
-	sesion := models.Sesion{
+	sesion := models.Session{
 		UserID:       user.ID,
 		Username:     user.Username,
 		RefreshToken: refreshToken,
 		IPAddress:    c.ClientIP(),
-		ExpiresAt:    time.Now().Add(24 * time.Hour),
+		ExpiresAt:    time.Now().Add(4 * time.Hour),
 	}
 
 	config.DB.Create(&sesion)
 
-	c.SetCookie("token", token, 3600, "/", "localhost", false, true)
-	c.SetCookie("refresh_token", refreshToken, 3600*24, "/", "localhost", false, true)
+	c.SetCookie("token", token, 60 * 15, "/", "localhost", false, true)
+	c.SetCookie("refresh_token", refreshToken, 3600*4, "/", "localhost", false, true)
 
 	apiResponse = responses.APIResponse{
 		StatusCode: http.StatusOK,
@@ -59,7 +59,12 @@ func Login(c *gin.Context) {
 }
 
 func ValidateStillValidSession(c *gin.Context) {
-	token, _ := c.Cookie("token")
+	token, err := c.Cookie("token")
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
 
 	claims, err := guard.ValidateToken(token)
 	if err != nil {
@@ -71,15 +76,20 @@ func ValidateStillValidSession(c *gin.Context) {
 }
 
 func GenerateNewToken(c *gin.Context) {
-	refreshToken, _ := c.Cookie("refresh_token")
-	var sesion models.Sesion
+	refreshToken, err := c.Cookie("refresh_token")
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+	var sesion models.Session
 
 	if err := config.DB.Where("refresh_token = ?", refreshToken).First(&sesion).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
 		return
 	}
 
-	claims, _ := guard.GenerateToken(sesion.UserID, sesion.Username)
+	claims, _ := guard.GenerateToken(sesion.Username, sesion.UserID)
 
 	c.SetCookie("token", claims, 3600, "/", "localhost", false, true)
 
@@ -95,7 +105,7 @@ func GenerateNewToken(c *gin.Context) {
 func Logout(c *gin.Context) {
 	refreshToken, _ := c.Cookie("refresh_token")
 
-	config.DB.Where("refresh_token = ?", refreshToken).Delete(&models.Sesion{})
+	config.DB.Where("refresh_token = ?", refreshToken).Delete(&models.Session{})
 
 	c.SetCookie("token", "", -1, "/", "", false, true)
 	c.SetCookie("refresh_token", "", -1, "/", "", false, true)

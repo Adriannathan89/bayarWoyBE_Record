@@ -75,3 +75,27 @@ func ValidateOtp(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, apiResponse)
 }
+
+func LoadAllRecords(c *gin.Context) {
+	userId := c.GetString("userID")
+	var user models.User
+
+	if err := config.DB.Preload("Records", "Debts").Where("id = ?", userId).First(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to load transactions"})
+		return
+	}
+
+	apiResponse := responses.APIResponse{
+		StatusCode: http.StatusOK,
+		Message:    "Transactions loaded successfully",
+		Data: gin.H{
+			"records": user.Records,
+			"debts":   user.Debts,
+			"cash":    user.Cash,
+			"debt":    user.Debt,
+			"receivable": user.Receivable,
+		},
+	}
+	c.JSON(http.StatusOK, apiResponse)
+
+}

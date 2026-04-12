@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Transaction struct {
+type Debt struct {
 	ID          string `gorm:"primaryKey" json:"id"`
 	OwnerID     string `gorm:"column:owner_id" json:"ownerId"`
 	Amount      int    `gorm:"column:amount" json:"amount"`
@@ -16,9 +16,9 @@ type Transaction struct {
 	Status      string `gorm:"column:status" json:"status"`
 }
 
-func (t *Transaction) BeforeCreate(tx *gorm.DB) error {
-	if t.ID == "" {
-		t.ID = uuid.NewString()
+func (d *Debt) BeforeCreate(tx *gorm.DB) error {
+	if d.ID == "" {
+		d.ID = uuid.NewString()
 	}
 	return nil
 }

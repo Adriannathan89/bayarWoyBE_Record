@@ -17,7 +17,7 @@ func LoadConfig() {
 	}
 
 	// migrate all model here
-	config.DB.AutoMigrate(&models.User{}, &models.Transaction{}, &models.Sesion{})
+	config.DB.AutoMigrate(&models.User{}, &models.Debt{}, &models.Session{})
 	config.DB.AutoMigrate(&models.Friendship{}, &models.FriendRequest{}, &botmodel.DiscordBotOtp{})
-	config.DB.AutoMigrate(&models.Expense{})
+	config.DB.AutoMigrate(&models.Record{})
 }
