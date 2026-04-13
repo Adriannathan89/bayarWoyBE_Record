@@ -1,4 +1,4 @@
-package service
+package user_friend_service
 
 import (
 	"bayar-woy-project/config"

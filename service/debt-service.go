@@ -103,3 +103,22 @@ func FinishDebt(c *gin.Context) {
 
 	c.JSON(http.StatusOK, apiResponse)
 }
+
+func LoadAllDebt(c *gin.Context) {
+	userId := c.GetString("userID")
+	var user models.User
+
+	if err := config.DB.Preload("Debts", "Owner").Where("id = ?", userId).First(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to load debts"})
+		return
+	}
+
+	apiResponse := responses.APIResponse{
+		StatusCode: http.StatusOK,
+		Message:    "Debts loaded successfully",
+		Data: gin.H{
+			"debts": user.Debts,
+		},
+	}
+	c.JSON(http.StatusOK, apiResponse)
+}
