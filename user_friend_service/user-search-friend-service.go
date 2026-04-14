@@ -11,7 +11,7 @@ import (
 func containsFriend(friendships []models.Friendship, userId string) string {
 	for _, friendship := range friendships {
 		if friendship.FriendID == userId {
-			return "friend"
+			return friendship.Status
 		}
 	}
 	return "not_friend"
@@ -62,7 +62,7 @@ func GetAllFriends(c *gin.Context) {
 	userId := c.GetString("userID")
 	var friends []models.Friendship
 
-	if err := config.DB.Where("user_id = ?", userId).Find(&friends).Error; err != nil {
+	if err := config.DB.Where("user_id = ? AND status = ?", userId, "accepted").Find(&friends).Error; err != nil {
 		c.JSON(500, gin.H{"message": "Failed to get friends"})
 		return
 	}

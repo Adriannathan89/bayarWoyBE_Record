@@ -50,7 +50,7 @@ func TestGetFriendRequestsReturnsInternalErrorWithCurrentColumnName(t *testing.T
 	gin.SetMode(gin.TestMode)
 	db := testutil.SetupTestDB(t)
 
-	req := models.FriendRequest{SenderUsername: "alice", ReceiverUsername: "bob"}
+	req := models.FriendRequest{SenderID: "alice", ReceiverID: "bob"}
 	if err := db.Create(&req).Error; err != nil {
 		t.Fatalf("failed seeding request: %v", err)
 	}
@@ -58,7 +58,7 @@ func TestGetFriendRequestsReturnsInternalErrorWithCurrentColumnName(t *testing.T
 	rec := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(rec)
 	c.Request = httptest.NewRequest(http.MethodGet, "/friends/requests", nil)
-	c.Set("username", "alice")
+	c.Set("userID", "alice")
 
 	ufs.GetFriendRequests(c)
 
@@ -71,7 +71,7 @@ func TestFriendRequestResponseReject(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	db := testutil.SetupTestDB(t)
 
-	reqModel := models.FriendRequest{SenderUsername: "alice", ReceiverUsername: "bob"}
+	reqModel := models.FriendRequest{SenderID: "alice", ReceiverID: "bob"}
 	if err := db.Create(&reqModel).Error; err != nil {
 		t.Fatalf("failed seeding request: %v", err)
 	}

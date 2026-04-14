@@ -10,8 +10,9 @@ type Friendship struct {
 	UserID   string `gorm:"column:user_id" json:"userId"`
 	FriendID string `gorm:"column:friend_id" json:"friendId"`
 
-	User   User `gorm:"foreignKey:UserID; reference:UserID" json:"user"`
-	Friend User `gorm:"foreignKey:FriendID; reference:FriendID" json:"friend"`
+	User   User   `gorm:"foreignKey:UserID; reference:UserID" json:"user"`
+	Friend User   `gorm:"foreignKey:FriendID; reference:FriendID" json:"friend"`
+	Status string `gorm:"column:status" json:"status"`
 }
 
 func (f *Friendship) BeforeCreate(tx *gorm.DB) error {

@@ -12,26 +12,37 @@ import (
 func LoadAllRecords(c *gin.Context) {
 	userId := c.GetString("userID")
 	var user models.User
-	var records []responses.RecordResponse
-	
+	var expenses []responses.RecordResponse
+	var incomes []responses.RecordResponse
+	var debts []responses.RecordResponse
 
-	if err := config.DB.Preload("Records", "Debts").Where("id = ?", userId).First(&user).Error; err != nil {
+	if err := config.DB.Preload("Records").Preload("Debts").Where("id = ?", userId).First(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to load transactions"})
 		return
 	}
 
 	for _, record := range user.Records {
-		records = append(records, responses.RecordResponse{
-			ID:          record.ID,
-			Title:       record.Title,
-			Description: record.Description,
-			Amount:      record.Amount,
-			Type:        record.Type,
-		})
+		if record.Type == "expense" {
+			expenses = append(expenses, responses.RecordResponse{
+				ID:          record.ID,
+				Title:       record.Title,
+				Description: record.Description,
+				Amount:      record.Amount,
+				Type:        record.Type,
+			})
+		} else if record.Type == "income" {
+			incomes = append(incomes, responses.RecordResponse{
+				ID:          record.ID,
+				Title:       record.Title,
+				Description: record.Description,
+				Amount:      record.Amount,
+				Type:        record.Type,
+			})
+		}
 	}
 
 	for _, debt := range user.Debts {
-		records = append(records, responses.RecordResponse{
+		debts = append(debts, responses.RecordResponse{
 			ID:          debt.ID,
 			Title:       "Debt with " + debt.Debtor.Username,
 			Description: debt.Description,
@@ -44,9 +55,11 @@ func LoadAllRecords(c *gin.Context) {
 		StatusCode: http.StatusOK,
 		Message:    "Transactions loaded successfully",
 		Data: gin.H{
-			"records": records,
-			"cash":    user.Cash,
-			"debt":    user.Debt,
+			"expenses":   expenses,
+			"incomes":    incomes,
+			"debts":      debts,
+			"cash":       user.Cash,
+			"debt":       user.Debt,
 			"receivable": user.Receivable,
 		},
 	}

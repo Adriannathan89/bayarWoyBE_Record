@@ -1,5 +1,5 @@
 package dto
 
 type RelationPhase1 struct {
-	FriendUsername string `json:"friendUsername" binding:"required"`
+	FriendID string `json:"friendId" binding:"required"`
 }
