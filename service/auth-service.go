@@ -47,8 +47,8 @@ func Login(c *gin.Context) {
 
 	config.DB.Create(&sesion)
 
-	c.SetCookie("token", token, 60 * 15, "/", "localhost", false, true)
-	c.SetCookie("refresh_token", refreshToken, 3600*4, "/", "localhost", false, true)
+	c.SetCookie("token", token, 60*15, "/", "bayarwoy.adrianpotofolio.my.id", true, true)
+	c.SetCookie("refresh_token", refreshToken, 3600*4, "/", "bayarwoy.adrianpotofolio.my.id", true, true)
 
 	apiResponse = responses.APIResponse{
 		StatusCode: http.StatusOK,
