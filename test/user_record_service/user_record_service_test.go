@@ -49,7 +49,7 @@ func TestCreateRecordIncomeUpdatesCash(t *testing.T) {
 	}
 }
 
-func TestLoadAllRecordsReturnsInternalErrorWithCurrentPreloadQuery(t *testing.T) {
+func TestLoadAllRecordsReturnsOK(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	db := testutil.SetupTestDB(t)
 
@@ -79,7 +79,7 @@ func TestLoadAllRecordsReturnsInternalErrorWithCurrentPreloadQuery(t *testing.T)
 
 	urs.LoadAllRecords(c)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Fatalf("expected status 500, got %d", rec.Code)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
 	}
 }

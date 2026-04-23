@@ -10,6 +10,5 @@ func UserController(r *gin.Engine) {
 	user := r.Group("/user")
 	{
 		user.POST("/register", service.Register)
-		user.POST("/validate-otp", service.ValidateOtp)
 	}
 }

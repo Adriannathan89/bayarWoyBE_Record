@@ -35,9 +35,9 @@ func TestSentFriendRequestSuccess(t *testing.T) {
 	_ = db.Create(&receiver).Error
 
 	c, rec := newJSONContext(http.MethodPost, "/friends/request", gin.H{
-		"friendUsername": "bob",
+		"friendId": receiver.ID,
 	})
-	c.Set("username", "alice")
+	c.Set("userID", sender.ID)
 
 	ufs.SentFriendRequest(c)
 
@@ -78,7 +78,7 @@ func TestFriendRequestResponseReject(t *testing.T) {
 
 	c, rec := newJSONContext(http.MethodPost, "/friends/respond", gin.H{
 		"friendshipId": reqModel.ID,
-		"action":      "reject",
+		"action":       "reject",
 	})
 
 	ufs.FriendRequestResponse(c)

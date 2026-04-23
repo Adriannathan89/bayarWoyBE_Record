@@ -1,7 +1,6 @@
 package testutil
 
 import (
-	botmodel "bayar-woy-project/bot-model"
 	"bayar-woy-project/config"
 	"bayar-woy-project/models"
 	"fmt"
@@ -28,7 +27,6 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		&models.Debt{},
 		&models.FriendRequest{},
 		&models.Friendship{},
-		&botmodel.DiscordBotOtp{},
 	)
 	if err != nil {
 		t.Fatalf("failed to migrate sqlite test db: %v", err)
