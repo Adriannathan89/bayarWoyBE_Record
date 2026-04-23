@@ -13,7 +13,7 @@ var jwtKey = []byte(config.GetEnv("JWT_SECRET_KEY"))
 var refreshJwtKey = []byte(config.GetEnv("JWT_REFRESH_SECRET_KEY"))
 
 func GenerateToken(username string, userID string) (string, error) {
-	expirationTime := time.Now().Add(15 * time.Minute)
+	expirationTime := time.Now().Add(10 * time.Minute)
 
 	claims := models.Claims{
 		Username: username,
@@ -31,13 +31,13 @@ func GenerateToken(username string, userID string) (string, error) {
 }
 
 func GenerateRefreshToken(username string, userID string) (string, error) {
-	expirationTime := time.Now().Add(4 * time.Hour)
+	expirationTime := time.Now().Add(720 * time.Hour)
 	claims := models.Claims{
 		Username: username,
 		UserID:   userID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
-			Issuer:    "my-app",
+			Issuer:    "bayarwoy-record",
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
@@ -54,7 +54,7 @@ func ValidateToken(tokenString string) (*models.Claims, error) {
 		return jwtKey, nil
 	})
 
-	if(err != nil || !token.Valid) {	
+	if err != nil || !token.Valid {
 		return nil, err
 	}
 
