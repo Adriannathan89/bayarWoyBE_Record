@@ -42,14 +42,14 @@ func Login(c *gin.Context) {
 		Username:     user.Username,
 		RefreshToken: refreshToken,
 		IPAddress:    c.ClientIP(),
-		ExpiresAt:    time.Now().Add(4 * time.Hour),
+		ExpiresAt:    time.Now().Add(720 * time.Hour),
 	}
 
 	config.DB.Create(&sesion)
 
 	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie("token", token, 60*15, "/", ".adrianportofolio.my.id", true, true)
-	c.SetCookie("refresh_token", refreshToken, 3600*4, "/", ".adrianportofolio.my.id", true, true)
+	c.SetCookie("token", token, 60*10, "/", ".adrianportofolio.my.id", true, true)
+	c.SetCookie("refresh_token", refreshToken, 3600*720, "/", ".adrianportofolio.my.id", true, true)
 
 	apiResponse = responses.APIResponse{
 		StatusCode: http.StatusOK,
