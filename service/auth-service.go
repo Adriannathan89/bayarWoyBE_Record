@@ -47,8 +47,9 @@ func Login(c *gin.Context) {
 
 	config.DB.Create(&sesion)
 
-	c.SetCookie("token", token, 60*15, "/", "bayarwoy.adrianportofolio.my.id", true, true)
-	c.SetCookie("refresh_token", refreshToken, 3600*4, "/", "bayarwoy.adrianportofolio.my.id", true, true)
+	c.SetSameSite(http.SameSiteNoneMode)
+	c.SetCookie("token", token, 60*15, "/", ".bayarwoy.adrianportofolio.my.id", true, true)
+	c.SetCookie("refresh_token", refreshToken, 3600*4, "/", ".bayarwoy.adrianportofolio.my.id", true, true)
 
 	apiResponse = responses.APIResponse{
 		StatusCode: http.StatusOK,
@@ -91,7 +92,8 @@ func GenerateNewToken(c *gin.Context) {
 
 	claims, _ := guard.GenerateToken(sesion.Username, sesion.UserID)
 
-	c.SetCookie("token", claims, 3600, "/", "localhost", false, true)
+	c.SetSameSite(http.SameSiteNoneMode)
+	c.SetCookie("token", claims, 3600, "/", ".bayarwoy.adrianportofolio.my.id", true, true)
 
 	apiResponse := responses.APIResponse{
 		StatusCode: http.StatusOK,
@@ -107,8 +109,9 @@ func Logout(c *gin.Context) {
 
 	config.DB.Where("refresh_token = ?", refreshToken).Delete(&models.Session{})
 
-	c.SetCookie("token", "", -1, "/", "", false, true)
-	c.SetCookie("refresh_token", "", -1, "/", "", false, true)
+	c.SetSameSite(http.SameSiteNoneMode)
+	c.SetCookie("token", "", -1, "/", ".bayarwoy.adrianportofolio.my.id", true, true)
+	c.SetCookie("refresh_token", "", -1, "/", ".bayarwoy.adrianportofolio.my.id", true, true)
 
 	apiResponse := responses.APIResponse{
 		StatusCode: http.StatusOK,
