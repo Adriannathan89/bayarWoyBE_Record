@@ -28,6 +28,7 @@ jobs:
             echo "DB_USER=${{ secrets.DB_USER }}"
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
             echo "DB_NAME=${{ secrets.DB_NAME }}"
+            echo "CLIENT_HOST=${{ secrets.CLIENT_HOST }}"
           } > .env
 
       - name: Build application image with Docker Compose
