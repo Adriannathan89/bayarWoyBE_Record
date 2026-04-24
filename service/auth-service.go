@@ -18,6 +18,7 @@ func Login(c *gin.Context) {
 	var req dto.CreateUserDTO
 	var apiResponse responses.APIResponse
 	var user models.User
+	var clientHost string = config.GetEnv("CLIENT_HOST")
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad Request"})
@@ -48,8 +49,8 @@ func Login(c *gin.Context) {
 	config.DB.Create(&sesion)
 
 	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie("token", token, 60*10, "/", ".adrianportofolio.my.id", true, true)
-	c.SetCookie("refresh_token", refreshToken, 3600*720, "/", ".adrianportofolio.my.id", true, true)
+	c.SetCookie("token", token, 60*10, "/", clientHost, true, true)
+	c.SetCookie("refresh_token", refreshToken, 3600*720, "/", clientHost, true, true)
 
 	apiResponse = responses.APIResponse{
 		StatusCode: http.StatusOK,
@@ -78,6 +79,7 @@ func ValidateStillValidSession(c *gin.Context) {
 
 func GenerateNewToken(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
+	var clientHost string = config.GetEnv("CLIENT_HOST")
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
@@ -93,7 +95,7 @@ func GenerateNewToken(c *gin.Context) {
 	claims, _ := guard.GenerateToken(sesion.Username, sesion.UserID)
 
 	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie("token", claims, 3600, "/", ".adrianportofolio.my.id", true, true)
+	c.SetCookie("token", claims, 3600, "/", clientHost, true, true)
 
 	apiResponse := responses.APIResponse{
 		StatusCode: http.StatusOK,
@@ -106,12 +108,13 @@ func GenerateNewToken(c *gin.Context) {
 
 func Logout(c *gin.Context) {
 	refreshToken, _ := c.Cookie("refresh_token")
+	var clientHost string = config.GetEnv("CLIENT_HOST")
 
 	config.DB.Where("refresh_token = ?", refreshToken).Delete(&models.Session{})
 
 	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie("token", "", -1, "/", ".adrianportofolio.my.id", true, true)
-	c.SetCookie("refresh_token", "", -1, "/", ".adrianportofolio.my.id", true, true)
+	c.SetCookie("token", "", -1, "/", clientHost, true, true)
+	c.SetCookie("refresh_token", "", -1, "/", clientHost, true, true)
 
 	apiResponse := responses.APIResponse{
 		StatusCode: http.StatusOK,
