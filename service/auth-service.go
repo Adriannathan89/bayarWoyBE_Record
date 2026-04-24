@@ -36,7 +36,7 @@ func Login(c *gin.Context) {
 	}
 
 	token, _ := guard.GenerateToken(user.Username, user.ID)
-	refreshToken, _ := guard.GenerateRefreshToken(user.ID, user.Username)
+	refreshToken, _ := guard.GenerateRefreshToken(user.Username, user.ID)
 
 	sesion := models.Session{
 		UserID:       user.ID,
@@ -61,49 +61,7 @@ func Login(c *gin.Context) {
 }
 
 func ValidateStillValidSession(c *gin.Context) {
-	token, err := c.Cookie("token")
-
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
-		return
-	}
-
-	claims, err := guard.ValidateToken(token)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Session is still valid", "claims": claims})
-}
-
-func GenerateNewToken(c *gin.Context) {
-	refreshToken, err := c.Cookie("refresh_token")
-	var clientHost string = config.GetEnv("CLIENT_HOST")
-
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
-		return
-	}
-	var sesion models.Session
-
-	if err := config.DB.Where("refresh_token = ?", refreshToken).First(&sesion).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
-		return
-	}
-
-	claims, _ := guard.GenerateToken(sesion.Username, sesion.UserID)
-
-	c.SetSameSite(http.SameSiteNoneMode)
-	c.SetCookie("token", claims, 3600, "/", clientHost, true, true)
-
-	apiResponse := responses.APIResponse{
-		StatusCode: http.StatusOK,
-		Message:    "Token refreshed successfully",
-		Data:       nil,
-	}
-
-	c.JSON(http.StatusOK, apiResponse)
+	c.JSON(http.StatusOK, gin.H{"message": "Session is still valid"})
 }
 
 func Logout(c *gin.Context) {

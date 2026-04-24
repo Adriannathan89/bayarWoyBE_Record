@@ -47,11 +47,25 @@ func GenerateRefreshToken(username string, userID string) (string, error) {
 	return refreshToken.SignedString(refreshJwtKey)
 }
 
-func ValidateToken(tokenString string) (*models.Claims, error) {
+func ValidateAccessToken(tokenString string) (*models.Claims, error) {
 	claims := &models.Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, err
+	}
+
+	return claims, nil
+}
+
+func ValidateRefreshToken(tokenString string) (*models.Claims, error) {
+	claims := &models.Claims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return refreshJwtKey, nil
 	})
 
 	if err != nil || !token.Valid {

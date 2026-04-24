@@ -1,7 +1,6 @@
 package service_test
 
 import (
-	"bayar-woy-project/guard"
 	"bayar-woy-project/models"
 	svc "bayar-woy-project/service"
 	"bayar-woy-project/testutil"
@@ -64,55 +63,6 @@ func TestLoginInvalidPassword(t *testing.T) {
 
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("expected status 401, got %d", rec.Code)
-	}
-}
-
-func TestValidateStillValidSessionWithoutCookie(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	testutil.SetupTestDB(t)
-
-	rec := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(rec)
-	c.Request = httptest.NewRequest(http.MethodGet, "/validate", nil)
-
-	svc.ValidateStillValidSession(c)
-
-	if rec.Code != http.StatusUnauthorized {
-		t.Fatalf("expected status 401, got %d", rec.Code)
-	}
-}
-
-func TestGenerateNewTokenSuccess(t *testing.T) {
-	gin.SetMode(gin.TestMode)
-	db := testutil.SetupTestDB(t)
-
-	user := models.User{Username: "bob", Password: "hashed"}
-	if err := db.Create(&user).Error; err != nil {
-		t.Fatalf("failed to seed user: %v", err)
-	}
-
-	rt, _ := guard.GenerateRefreshToken(user.Username, user.ID)
-	session := models.Session{
-		Username:     user.Username,
-		UserID:       user.ID,
-		RefreshToken: rt,
-		IPAddress:    "127.0.0.1",
-		ExpiresAt:    time.Now().Add(1 * time.Hour),
-	}
-	if err := db.Create(&session).Error; err != nil {
-		t.Fatalf("failed to seed session: %v", err)
-	}
-
-	rec := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(rec)
-	req := httptest.NewRequest(http.MethodPost, "/refresh", nil)
-	req.AddCookie(&http.Cookie{Name: "refresh_token", Value: rt})
-	c.Request = req
-
-	svc.GenerateNewToken(c)
-
-	if rec.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", rec.Code)
 	}
 }
 
