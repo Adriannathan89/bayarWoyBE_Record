@@ -9,9 +9,9 @@ type User struct {
 	ID          string   `gorm:"column:id; primaryKey" json:"id"`
 	Username    string   `gorm:"column:username; unique" json:"username"`
 	Password    string   `gorm:"column:password" json:"password"`
-	Debt        int      `gorm:"column:debt" json:"debt"`
-	Receivable  int      `gorm:"column:receivable" json:"receivable"`
-	Cash        int      `gorm:"column:cash" json:"cash"`
+	Debt        float32  `gorm:"column:debt" json:"debt"`
+	Receivable  float32  `gorm:"column:receivable" json:"receivable"`
+	Cash        float32  `gorm:"column:cash" json:"cash"`
 	DiscordID   *string  `gorm:"column:discord_id" json:"discordId"`
 	IsValidated bool     `gorm:"column:is_validated; default:false" json:"isValidated"`
 	Debts       []Debt   `gorm:"foreignKey:OwnerID" json:"debtsx"`

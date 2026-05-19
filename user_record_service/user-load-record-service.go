@@ -29,6 +29,7 @@ func LoadAllRecords(c *gin.Context) {
 				Description: record.Description,
 				Amount:      record.Amount,
 				Type:        record.Type,
+				CreatedAt:   record.CreatedAt.Format("2006-01-02 15:04:05"),
 			})
 		} else if record.Type == "income" {
 			incomes = append(incomes, responses.RecordResponse{
@@ -37,6 +38,7 @@ func LoadAllRecords(c *gin.Context) {
 				Description: record.Description,
 				Amount:      record.Amount,
 				Type:        record.Type,
+				CreatedAt:   record.CreatedAt.Format("2006-01-02 15:04:05"),
 			})
 		}
 	}
@@ -61,6 +63,7 @@ func LoadAllRecords(c *gin.Context) {
 			"cash":       user.Cash,
 			"debt":       user.Debt,
 			"receivable": user.Receivable,
+			"balance":    user.Cash + user.Receivable - user.Debt,
 		},
 	}
 	c.JSON(http.StatusOK, apiResponse)
