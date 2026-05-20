@@ -6,6 +6,7 @@ import (
 	"bayar-woy-project/models"
 	"bayar-woy-project/responses"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -21,15 +22,22 @@ func CreateRecord(c *gin.Context) {
 		return
 	}
 
+	parsedTime, err := time.Parse("2006-01-02", req.Date)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid date format"})
+		return
+	}
+
 	expense := models.Record{
 		Title:       req.Title,
 		Description: req.Description,
 		Amount:      req.Amount,
 		OwnerID:     userId,
 		Type:        req.Type,
+		CreatedAt:   parsedTime,
 	}
 
-	err := config.DB.Transaction(func(tx *gorm.DB) error {
+	err2 := config.DB.Transaction(func(tx *gorm.DB) error {
 		if err := config.DB.Where("id = ?", userId).First(&user).Error; err != nil {
 			return err
 		}
@@ -50,7 +58,7 @@ func CreateRecord(c *gin.Context) {
 		return nil
 	})
 
-	if err != nil {
+	if err2 != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create expense"})
 		return
 	}
