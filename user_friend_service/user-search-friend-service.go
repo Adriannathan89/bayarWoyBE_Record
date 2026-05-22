@@ -4,7 +4,6 @@ import (
 	"bayar-woy-project/config"
 	"bayar-woy-project/models"
 	"bayar-woy-project/responses"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -62,7 +61,6 @@ func SearchFriend(c *gin.Context) {
 func GetAllFriends(c *gin.Context) {
 	userId := c.GetString("userID")
 	var friends []models.Friendship
-	fmt.Print(userId)
 
 	if err := config.DB.Preload("Friend").Where("user_id = ? AND status = ?", userId, "accepted").Find(&friends).Error; err != nil {
 		c.JSON(500, gin.H{"message": "Failed to get friends"})
