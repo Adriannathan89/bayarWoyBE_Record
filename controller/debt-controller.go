@@ -14,5 +14,6 @@ func DebtController(r *gin.Engine) {
 		debt.POST("/create", service.CreateDebt)
 		debt.PUT("/finish", service.FinishDebt)
 		debt.GET("", service.LoadAllDebt)
+		debt.GET("/owed", service.LoadOwedDebt)
 	}
 }
