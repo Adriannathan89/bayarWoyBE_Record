@@ -16,7 +16,7 @@ func CreateDebt(c *gin.Context) {
 	var req dto.DebtDTO
 	var owner models.User
 	var debtor models.User
-	userId := c.GetString("userId")
+	userId := c.GetString("userID")
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad Request"})
@@ -108,7 +108,7 @@ func LoadAllDebt(c *gin.Context) {
 	userId := c.GetString("userID")
 	var user models.User
 
-	if err := config.DB.Preload("Debts", "Owner").Where("id = ?", userId).First(&user).Error; err != nil {
+	if err := config.DB.Preload("Debts.Owner").Preload("Debts.Debtor").Where("id = ?", userId).First(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to load debts"})
 		return
 	}
@@ -121,4 +121,22 @@ func LoadAllDebt(c *gin.Context) {
 		},
 	}
 	c.JSON(http.StatusOK, apiResponse)
+}
+
+func LoadOwedDebt(c *gin.Context) {
+	userId := c.GetString("userID")
+	var debts []models.Debt
+
+	if err := config.DB.Preload("Owner").Preload("Debtor").
+		Where("debtor_id = ? AND status = ?", userId, "pending").
+		Find(&debts).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to load owed debts"})
+		return
+	}
+
+	c.JSON(http.StatusOK, responses.APIResponse{
+		StatusCode: http.StatusOK,
+		Message:    "Owed debts loaded successfully",
+		Data:       gin.H{"debts": debts},
+	})
 }

@@ -7,12 +7,11 @@ import (
 
 type Friendship struct {
 	ID       string `gorm:"primaryKey" json:"id"`
-	UserID   string `gorm:"column:user_id" json:"userId"`
-	FriendID string `gorm:"column:friend_id" json:"friendId"`
-
-	User   User   `gorm:"foreignKey:UserID; reference:UserID" json:"user"`
-	Friend User   `gorm:"foreignKey:FriendID; reference:FriendID" json:"friend"`
-	Status string `gorm:"column:status" json:"status"`
+	UserID   string `gorm:"column:user_id;uniqueIndex:unique_friendship,composite:1" json:"userId"`
+	FriendID string `gorm:"column:friend_id;uniqueIndex:unique_friendship,composite:2" json:"friendId"`
+	User     User   `gorm:"foreignKey:UserID;references:ID" json:"user"`
+	Friend   User   `gorm:"foreignKey:FriendID;references:ID" json:"friend"`
+	Status   string `gorm:"column:status" json:"status"`
 }
 
 func (f *Friendship) BeforeCreate(tx *gorm.DB) error {

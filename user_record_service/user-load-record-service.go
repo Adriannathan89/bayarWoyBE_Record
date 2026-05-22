@@ -50,6 +50,7 @@ func LoadAllRecords(c *gin.Context) {
 			Description: debt.Description,
 			Amount:      debt.Amount,
 			Type:        "debt",
+			CreatedAt:   debt.CreatedAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 

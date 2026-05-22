@@ -39,6 +39,7 @@ func TestCreateRecordIncomeUpdatesCash(t *testing.T) {
 		"description": "monthly income",
 		"amount":      50,
 		"type":        "income",
+		"date":        "2026-01-01",
 	})
 	c.Set("userID", user.ID)
 
