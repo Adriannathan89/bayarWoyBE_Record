@@ -95,6 +95,7 @@ jobs:
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
+          SLM_URL: ${{ secrets.SLM_URL }}
           GHCR_USERNAME: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
         with:
@@ -102,7 +103,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          envs: APP_IMAGE,VPS_APP_DIR,PORT,ALLOWED_ORIGINS,JWT_SECRET_KEY,JWT_REFRESH_SECRET_KEY,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,GHCR_USERNAME,GHCR_TOKEN, CLIENT_HOST
+          envs: APP_IMAGE,VPS_APP_DIR,PORT,ALLOWED_ORIGINS,JWT_SECRET_KEY,JWT_REFRESH_SECRET_KEY,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,SLM_URL,GHCR_USERNAME,GHCR_TOKEN,CLIENT_HOST
           script: |
             set -e
             mkdir -p "$VPS_APP_DIR"
@@ -119,6 +120,7 @@ jobs:
             DB_PASSWORD=$DB_PASSWORD
             DB_NAME=$DB_NAME
             CLIENT_HOST=$CLIENT_HOST
+            SLM_URL=$SLM_URL
             EOF
 
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin

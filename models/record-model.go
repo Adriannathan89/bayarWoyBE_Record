@@ -12,6 +12,7 @@ type Record struct {
 	Title       string    `gorm:"column:title" json:"title"`
 	Description string    `gorm:"column:description; nullable" json:"description"`
 	Amount      float32   `gorm:"column:amount" json:"amount"`
+	Category    string    `gorm:"column:category" json:"category"`
 	OwnerID     string    `gorm:"column:owner_id" json:"ownerId"`
 	Owner       User      `gorm:"foreignKey:OwnerID" json:"owner"`
 	Type        string    `gorm:"column:type" json:"type"`
