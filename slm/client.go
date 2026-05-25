@@ -1,10 +1,10 @@
 package slm
 
 import (
+	"bayar-woy-project/config"
 	"bytes"
 	"encoding/json"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -23,7 +23,7 @@ type ClassifyResult struct {
 // Classify calls the SLM service and returns category + transaction type.
 // Returns empty strings if SLM is unreachable — caller still proceeds.
 func Classify(title string) ClassifyResult {
-	baseURL := os.Getenv("SLM_URL")
+	baseURL := config.GetEnv("SLM_URL")
 
 	payload, _ := json.Marshal(map[string]string{"title": title})
 	client := &http.Client{Timeout: 2 * time.Second}
