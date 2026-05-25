@@ -5,6 +5,7 @@ import (
 	"bayar-woy-project/dto"
 	"bayar-woy-project/models"
 	"bayar-woy-project/responses"
+	"bayar-woy-project/slm"
 	"errors"
 	"fmt"
 	"net/http"
@@ -30,9 +31,12 @@ func CreateDebt(c *gin.Context) {
 		return
 	}
 
+	category := slm.ClassifyTitle(req.Description)
+
 	transactionModel := models.Debt{
 		Amount:      req.Amount,
 		Description: req.Description,
+		Category:    category,
 		DebtorID:    req.DebtorID,
 		OwnerID:     userId,
 		Status:      "pending",
@@ -63,6 +67,7 @@ func CreateDebt(c *gin.Context) {
 		ownerRecord := models.Record{
 			Title:       "Hutang ke " + debtor.Username,
 			Description: req.Description,
+			Category:    category,
 			Amount:      req.Amount,
 			OwnerID:     userId,
 			Type:        "expense",

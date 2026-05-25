@@ -5,6 +5,7 @@ import (
 	"bayar-woy-project/dto"
 	"bayar-woy-project/models"
 	"bayar-woy-project/responses"
+	"bayar-woy-project/slm"
 	"net/http"
 	"time"
 
@@ -28,12 +29,19 @@ func CreateRecord(c *gin.Context) {
 		return
 	}
 
+	slmResult := slm.Classify(req.Title)
+	recordType := "expense"
+	if slmResult.TransactionType == "pemasukan" {
+		recordType = "income"
+	}
+
 	expense := models.Record{
 		Title:       req.Title,
 		Description: req.Description,
 		Amount:      req.Amount,
+		Category:    slmResult.Category,
 		OwnerID:     userId,
-		Type:        req.Type,
+		Type:        recordType,
 		CreatedAt:   parsedTime,
 	}
 
@@ -42,7 +50,7 @@ func CreateRecord(c *gin.Context) {
 			return err
 		}
 
-		if req.Type == "income" {
+		if recordType == "income" {
 			user.Cash += req.Amount
 		} else {
 			user.Cash -= req.Amount

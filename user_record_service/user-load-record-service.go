@@ -28,6 +28,7 @@ func LoadAllRecords(c *gin.Context) {
 				Title:       record.Title,
 				Description: record.Description,
 				Amount:      record.Amount,
+				Category:    record.Category,
 				Type:        record.Type,
 				CreatedAt:   record.CreatedAt.Format("2006-01-02 15:04:05"),
 			})
@@ -37,6 +38,7 @@ func LoadAllRecords(c *gin.Context) {
 				Title:       record.Title,
 				Description: record.Description,
 				Amount:      record.Amount,
+				Category:    record.Category,
 				Type:        record.Type,
 				CreatedAt:   record.CreatedAt.Format("2006-01-02 15:04:05"),
 			})

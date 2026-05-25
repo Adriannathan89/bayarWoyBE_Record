@@ -12,6 +12,7 @@ type Debt struct {
 	OwnerID     string    `gorm:"column:owner_id" json:"ownerId"`
 	Amount      float32   `gorm:"column:amount" json:"amount"`
 	Description string    `gorm:"column:description" json:"description"`
+	Category    string    `gorm:"column:category" json:"category"`
 	Owner       User      `gorm:"foreignKey:OwnerID; reference:ID" json:"owner"`
 	DebtorID    string    `gorm:"column:debtor_id" json:"debtorId"`
 	Debtor      User      `gorm:"foreignKey:DebtorID; reference:ID" json:"debtor"`
