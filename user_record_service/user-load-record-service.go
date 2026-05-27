@@ -16,21 +16,31 @@ func LoadAllRecords(c *gin.Context) {
 	var incomes []responses.RecordResponse
 	var debts []responses.RecordResponse
 
-	if err := config.DB.Preload("Records").Preload("Debts").Where("id = ?", userId).First(&user).Error; err != nil {
+	if err := config.DB.Preload("Records.Categories").Preload("Debts").Where("id = ?", userId).First(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to load transactions"})
 		return
 	}
 
 	for _, record := range user.Records {
+		var categories []responses.CategoryInfo
+		for _, cat := range record.Categories {
+			categories = append(categories, responses.CategoryInfo{
+				ID:   cat.ID,
+				Name: cat.Name,
+				Type: cat.Type,
+			})
+		}
+
 		if record.Type == "expense" {
 			expenses = append(expenses, responses.RecordResponse{
 				ID:          record.ID,
 				Title:       record.Title,
 				Description: record.Description,
 				Amount:      record.Amount,
-				Category:    record.Category,
+				Categories:  categories,
 				Type:        record.Type,
 				CreatedAt:   record.CreatedAt.Format("2006-01-02 15:04:05"),
+				IsCommitted: record.IsCommitted,
 			})
 		} else if record.Type == "income" {
 			incomes = append(incomes, responses.RecordResponse{
@@ -38,9 +48,10 @@ func LoadAllRecords(c *gin.Context) {
 				Title:       record.Title,
 				Description: record.Description,
 				Amount:      record.Amount,
-				Category:    record.Category,
+				Categories:  categories,
 				Type:        record.Type,
 				CreatedAt:   record.CreatedAt.Format("2006-01-02 15:04:05"),
+				IsCommitted: record.IsCommitted,
 			})
 		}
 	}

@@ -12,5 +12,9 @@ func LoadConfig() {
 	// migrate all model here
 	config.DB.AutoMigrate(&models.User{}, &models.Debt{}, &models.Session{})
 	config.DB.AutoMigrate(&models.Friendship{}, &models.FriendRequest{})
+	config.DB.AutoMigrate(&models.Category{})
 	config.DB.AutoMigrate(&models.Record{})
+
+	// seed categories
+	SeedCategories(config.DB)
 }

@@ -23,6 +23,7 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 	err = db.AutoMigrate(
 		&models.User{},
 		&models.Session{},
+		&models.Category{},
 		&models.Record{},
 		&models.Debt{},
 		&models.FriendRequest{},

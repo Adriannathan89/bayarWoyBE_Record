@@ -13,5 +13,7 @@ func UserRecordController(r *gin.Engine) {
 	{
 		user.POST("/record", user_record_service.CreateRecord)
 		user.GET("/records", user_record_service.LoadAllRecords)
+		user.PUT("/record/commit", user_record_service.CommitRecord)
+		user.DELETE("/record/:id", user_record_service.DeleteRecord)
 	}
 }

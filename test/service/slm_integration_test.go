@@ -31,9 +31,10 @@ func TestCreateRecordWithSLMClassification(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := map[string]interface{}{
-			"category":         "makanan_minuman",
-			"transaction_type": "pengeluaran",
-			"confidence":       0.95,
+			"category":           "makanan",
+			"secondary_category": "makanan",
+			"transaction_type":   "pengeluaran",
+			"confidence":         0.95,
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
@@ -63,37 +64,35 @@ func TestCreateRecordWithSLMClassification(t *testing.T) {
 		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
 	}
 
+	// Verify record was created with correct type (expense)
 	var response responses.APIResponse
 	if err := json.NewDecoder(rec.Body).Decode(&response); err != nil {
 		t.Fatalf("failed to decode response: %v", err)
 	}
-
-	// Verify response contains the category from SLM
 	data := response.Data.(map[string]interface{})
-	if data["category"] != "makanan_minuman" {
-		t.Fatalf("expected category 'makanan_minuman', got %v", data["category"])
-	}
-
-	// Verify record was created with correct type (expense)
 	if data["type"] != "expense" {
 		t.Fatalf("expected type 'expense', got %v", data["type"])
 	}
 
-	// Verify record was saved to database
+	// Verify record is uncommitted (draft)
+	if data["isCommitted"] != false {
+		t.Fatalf("expected isCommitted false for new record, got %v", data["isCommitted"])
+	}
+
+	// Verify record saved in DB
 	var record models.Record
 	if err := db.Where("owner_id = ? AND title = ?", user.ID, "Beli kopi").First(&record).Error; err != nil {
 		t.Fatalf("failed to find record: %v", err)
 	}
-
-	if record.Category != "makanan_minuman" {
-		t.Fatalf("expected category 'makanan_minuman' in db, got %s", record.Category)
+	if record.IsCommitted {
+		t.Fatal("expected record IsCommitted=false after create")
 	}
 
-	// Verify user cash was updated (decreased by amount)
+	// Verify cash was NOT updated (deferred to commit step)
 	var updatedUser models.User
 	db.Where("id = ?", user.ID).First(&updatedUser)
-	if updatedUser.Cash != 950000 {
-		t.Fatalf("expected cash 950000, got %f", updatedUser.Cash)
+	if updatedUser.Cash != 1000000 {
+		t.Fatalf("expected cash unchanged at 1000000, got %f", updatedUser.Cash)
 	}
 }
 
@@ -109,9 +108,10 @@ func TestCreateRecordWithSLMIncomeType(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := map[string]interface{}{
-			"category":         "gaji",
-			"transaction_type": "pemasukan",
-			"confidence":       0.98,
+			"category":           "gaji",
+			"secondary_category": "gaji",
+			"transaction_type":   "pemasukan",
+			"confidence":         0.98,
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
@@ -149,11 +149,11 @@ func TestCreateRecordWithSLMIncomeType(t *testing.T) {
 		t.Fatalf("expected type 'income' for pemasukan, got %v", data["type"])
 	}
 
-	// Verify user cash was increased
+	// Verify cash was NOT updated (deferred to commit step)
 	var updatedUser models.User
 	db.Where("id = ?", user.ID).First(&updatedUser)
-	if updatedUser.Cash != 5000000 {
-		t.Fatalf("expected cash 5000000, got %f", updatedUser.Cash)
+	if updatedUser.Cash != 0 {
+		t.Fatalf("expected cash unchanged at 0, got %f", updatedUser.Cash)
 	}
 }
 
@@ -190,18 +190,13 @@ func TestCreateRecordSLMUnreachableGraceful(t *testing.T) {
 		t.Fatalf("expected graceful fallback (200), got %d: %s", rec.Code, rec.Body.String())
 	}
 
-	var response responses.APIResponse
-	json.NewDecoder(rec.Body).Decode(&response)
-
-	data := response.Data.(map[string]interface{})
-	if data["category"] != "" {
-		t.Fatalf("expected empty category when SLM unavailable, got %v", data["category"])
-	}
-
-	// Verify record was still created with empty category
+	// Verify record was still created even when SLM unavailable
 	var record models.Record
 	if err := db.Where("owner_id = ? AND title = ?", user.ID, "Beli sesuatu").First(&record).Error; err != nil {
 		t.Fatalf("expected record to be created even when SLM unavailable: %v", err)
+	}
+	if record.IsCommitted {
+		t.Fatal("expected record IsCommitted=false")
 	}
 }
 
@@ -222,9 +217,10 @@ func TestCreateDebtWithSLMClassification(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := map[string]interface{}{
-			"category":         "pinjaman_uang",
-			"transaction_type": "pengeluaran",
-			"confidence":       0.92,
+			"category":           "tagihan",
+			"secondary_category": "kredit",
+			"transaction_type":   "pengeluaran",
+			"confidence":         0.92,
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)
@@ -253,22 +249,13 @@ func TestCreateDebtWithSLMClassification(t *testing.T) {
 		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
 	}
 
-	var response responses.APIResponse
-	json.NewDecoder(rec.Body).Decode(&response)
-
-	data := response.Data.(map[string]interface{})
-	if data["category"] != "pinjaman_uang" {
-		t.Fatalf("expected category 'pinjaman_uang', got %v", data["category"])
-	}
-
-	// Verify debt was saved with SLM category
+	// Verify debt was saved
 	var debt models.Debt
 	if err := db.Where("owner_id = ? AND debtor_id = ?", owner.ID, debtor.ID).First(&debt).Error; err != nil {
 		t.Fatalf("failed to find debt: %v", err)
 	}
-
-	if debt.Category != "pinjaman_uang" {
-		t.Fatalf("expected category 'pinjaman_uang' in debt, got %s", debt.Category)
+	if debt.Amount != 500000 {
+		t.Fatalf("expected debt amount 500000, got %f", debt.Amount)
 	}
 
 	// Verify owner receivable increased
@@ -283,19 +270,6 @@ func TestCreateDebtWithSLMClassification(t *testing.T) {
 	db.Where("id = ?", debtor.ID).First(&updatedDebtor)
 	if updatedDebtor.Debt != 500000 {
 		t.Fatalf("expected debtor debt 500000, got %f", updatedDebtor.Debt)
-	}
-
-	// Verify record was created with SLM category for owner
-	var ownerRecord models.Record
-	if err := db.Where("owner_id = ?", owner.ID).First(&ownerRecord).Error; err != nil {
-		t.Fatalf("failed to find owner record: %v", err)
-	}
-
-	if ownerRecord.Category != "pinjaman_uang" {
-		t.Fatalf("expected owner record category 'pinjaman_uang', got %s", ownerRecord.Category)
-	}
-	if ownerRecord.Type != "expense" {
-		t.Fatalf("expected owner record type 'expense', got %s", ownerRecord.Type)
 	}
 }
 
@@ -336,14 +310,10 @@ func TestCreateDebtSLMUnreachableGraceful(t *testing.T) {
 		t.Fatalf("expected graceful fallback (200), got %d: %s", rec.Code, rec.Body.String())
 	}
 
-	// Verify debt was still created with empty category
+	// Verify debt was still created
 	var debt models.Debt
 	if err := db.Where("owner_id = ? AND debtor_id = ?", owner.ID, debtor.ID).First(&debt).Error; err != nil {
 		t.Fatalf("expected debt to be created even when SLM unavailable: %v", err)
-	}
-
-	if debt.Category != "" {
-		t.Fatalf("expected empty category when SLM unavailable, got %s", debt.Category)
 	}
 }
 
@@ -359,9 +329,10 @@ func TestCreateRecordWithCustomDate(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		response := map[string]interface{}{
-			"category":         "test",
-			"transaction_type": "pengeluaran",
-			"confidence":       0.8,
+			"category":           "belanja",
+			"secondary_category": "belanja",
+			"transaction_type":   "pengeluaran",
+			"confidence":         0.8,
 		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(response)

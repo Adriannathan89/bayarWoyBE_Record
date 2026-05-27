@@ -25,7 +25,7 @@ func newJSONContext(method string, path string, body any) (*gin.Context, *httpte
 	return c, rec
 }
 
-func TestCreateRecordIncomeUpdatesCash(t *testing.T) {
+func TestCreateRecordDoesNotUpdateCash(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	db := testutil.SetupTestDB(t)
 
@@ -34,11 +34,10 @@ func TestCreateRecordIncomeUpdatesCash(t *testing.T) {
 		t.Fatalf("failed seeding user: %v", err)
 	}
 
-	c, rec := newJSONContext(http.MethodPost, "/records", gin.H{
-		"title":       "salary",
-		"description": "monthly income",
-		"amount":      50,
-		"type":        "income",
+	c, rec := newJSONContext(http.MethodPost, "/user/record", gin.H{
+		"title":       "gaji bulan ini",
+		"description": "income",
+		"amount":      5000,
 		"date":        "2026-01-01",
 	})
 	c.Set("userID", user.ID)
@@ -46,7 +45,13 @@ func TestCreateRecordIncomeUpdatesCash(t *testing.T) {
 	urs.CreateRecord(c)
 
 	if rec.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", rec.Code)
+		t.Fatalf("expected status 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+
+	var updated models.User
+	db.First(&updated, "id = ?", user.ID)
+	if updated.Cash != 100 {
+		t.Errorf("expected cash to remain 100 after draft create, got %.2f", updated.Cash)
 	}
 }
 
@@ -63,7 +68,7 @@ func TestLoadAllRecordsReturnsOK(t *testing.T) {
 		t.Fatalf("failed seeding debtor: %v", err)
 	}
 
-	record := models.Record{Title: "Food", Description: "Lunch", Amount: 20, OwnerID: owner.ID, Type: "expense"}
+	record := models.Record{Title: "Food", Description: "Lunch", Amount: 20, OwnerID: owner.ID, Type: "expense", IsCommitted: false}
 	if err := db.Create(&record).Error; err != nil {
 		t.Fatalf("failed seeding record: %v", err)
 	}
@@ -75,7 +80,7 @@ func TestLoadAllRecordsReturnsOK(t *testing.T) {
 
 	rec := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(rec)
-	c.Request = httptest.NewRequest(http.MethodGet, "/records", nil)
+	c.Request = httptest.NewRequest(http.MethodGet, "/user/records", nil)
 	c.Set("userID", owner.ID)
 
 	urs.LoadAllRecords(c)
