@@ -14,6 +14,7 @@ func LoadConfig() {
 	config.DB.AutoMigrate(&models.Friendship{}, &models.FriendRequest{})
 	config.DB.AutoMigrate(&models.Category{})
 	config.DB.AutoMigrate(&models.Record{})
+	config.DB.AutoMigrate(&models.DiscordVerification{})
 
 	// seed categories
 	SeedCategories(config.DB)

@@ -2,6 +2,7 @@ package user_record_service
 
 import (
 	"bayar-woy-project/config"
+	"bayar-woy-project/discord"
 	"bayar-woy-project/dto"
 	"bayar-woy-project/models"
 	"bayar-woy-project/responses"
@@ -53,9 +54,11 @@ func CommitRecord(c *gin.Context) {
 		finalCategory = storedPrimary
 	}
 
-	// Final secondary: same-name as new primary if primary changed, otherwise stored
+	// Final secondary: from request if provided, otherwise same-name as new primary if primary changed, otherwise stored
 	finalSecondary := storedSecondary
-	if req.Category != "" && req.Category != storedPrimary {
+	if req.SecondaryCategory != "" {
+		finalSecondary = req.SecondaryCategory
+	} else if req.Category != "" && req.Category != storedPrimary {
 		finalSecondary = finalCategory
 	}
 
@@ -117,6 +120,16 @@ func CommitRecord(c *gin.Context) {
 
 	// Send SLM feedback (best-effort, outside transaction)
 	slm.Feedback(record.Title, finalCategory, finalSecondary)
+
+	// Send Discord notification (best-effort, fire-and-forget)
+	var fullUser models.User
+	if err := config.DB.First(&fullUser, "id = ?", userID).Error; err == nil {
+		// Re-load record with categories for notification
+		var notifRecord models.Record
+		if err := config.DB.Preload("Categories").First(&notifRecord, "id = ?", record.ID).Error; err == nil {
+			go discord.NotifyCommit(fullUser, notifRecord)
+		}
+	}
 
 	c.JSON(http.StatusOK, responses.APIResponse{
 		StatusCode: http.StatusOK,

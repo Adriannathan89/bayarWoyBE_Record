@@ -3,12 +3,13 @@ package main
 import (
 	"bayar-woy-project/config"
 	"bayar-woy-project/controller"
+	"bayar-woy-project/discord"
 	"bayar-woy-project/loader"
+	"log"
 	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,6 +38,13 @@ func parseAllowedOrigins(raw string) []string {
 func main() {
 	loader.LoadConfig()
 
+	if err := discord.Init(); err != nil {
+		log.Printf("[discord] Init failed (continuing without bot): %v", err)
+	} else {
+		defer discord.Shutdown()
+		discord.StartScheduler()
+	}
+
 	r := gin.Default()
 	allowedOrigins := parseAllowedOrigins(config.GetEnv("ALLOWED_ORIGINS"))
 
@@ -53,6 +61,7 @@ func main() {
 	controller.UserController(r)
 	controller.UserFriendController(r)
 	controller.UserRecordController(r)
+	controller.UserProfileController(r)
 
 	r.Run(":" + config.GetEnv("PORT"))
 }

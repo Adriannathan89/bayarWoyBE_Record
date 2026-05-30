@@ -28,6 +28,7 @@ func SetupTestDB(t *testing.T) *gorm.DB {
 		&models.Debt{},
 		&models.FriendRequest{},
 		&models.Friendship{},
+		&models.DiscordVerification{},
 	)
 	if err != nil {
 		t.Fatalf("failed to migrate sqlite test db: %v", err)
