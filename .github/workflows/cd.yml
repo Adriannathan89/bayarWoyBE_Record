@@ -96,6 +96,9 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           DB_NAME: ${{ secrets.DB_NAME }}
           SLM_URL: ${{ secrets.SLM_URL }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_BOT_USERNAME: ${{ secrets.DISCORD_BOT_USERNAME }}
+          DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
           GHCR_USERNAME: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GHCR_PAT }}
         with:
@@ -103,7 +106,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          envs: APP_IMAGE,VPS_APP_DIR,PORT,ALLOWED_ORIGINS,JWT_SECRET_KEY,JWT_REFRESH_SECRET_KEY,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,SLM_URL,GHCR_USERNAME,GHCR_TOKEN,CLIENT_HOST
+          envs: APP_IMAGE,VPS_APP_DIR,PORT,ALLOWED_ORIGINS,JWT_SECRET_KEY,JWT_REFRESH_SECRET_KEY,DB_HOST,DB_PORT,DB_USER,DB_PASSWORD,DB_NAME,SLM_URL,DISCORD_BOT_TOKEN,DISCORD_BOT_USERNAME,DISCORD_CLIENT_ID,GHCR_USERNAME,GHCR_TOKEN,CLIENT_HOST
           script: |
             set -e
             mkdir -p "$VPS_APP_DIR"
@@ -121,6 +124,9 @@ jobs:
             DB_NAME=$DB_NAME
             CLIENT_HOST=$CLIENT_HOST
             SLM_URL=$SLM_URL
+            DISCORD_BOT_TOKEN=$DISCORD_BOT_TOKEN
+            DISCORD_BOT_USERNAME=$DISCORD_BOT_USERNAME
+            DISCORD_CLIENT_ID=$DISCORD_CLIENT_ID
             EOF
 
             echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USERNAME" --password-stdin

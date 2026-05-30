@@ -29,6 +29,9 @@ jobs:
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
             echo "DB_NAME=${{ secrets.DB_NAME }}"
             echo "CLIENT_HOST=${{ secrets.CLIENT_HOST }}"
+            echo "DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}"
+            echo "DISCORD_BOT_USERNAME=${{ secrets.DISCORD_BOT_USERNAME }}"
+            echo "DISCORD_CLIENT_ID=${{ secrets.DISCORD_CLIENT_ID }}"
           } > .env
 
       - name: Build application image with Docker Compose
